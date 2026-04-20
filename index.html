@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Smart Agri Recommendation System</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<header>
+
+<nav class="container">
+
+<h2 class="logo">🌱 AgriVision AI</h2>
+
+<ul class="nav-links">
+
+<li><a href="#" onclick="showSection('home')">Home</a></li>
+<li><a href="#" onclick="showSection('about')">About</a></li>
+<li><a href="#" onclick="showSection('analysis')">Crop Analysis</a></li>
+<li><a href="#" onclick="showSection('recommendation')">Recommendations</a></li>
+<li><a href="#" onclick="showSection('technology')">Technology</a></li>
+<li id="navLogin"><a href="#" onclick="showSection('login')">Login</a></li>
+<li id="userDisplay" style="display:none; color:#fff; font-weight:bold;">
+👤 <span id="userEmail"></span>
+</li>
+<li id="logoutBtn" style="display:none;">
+<a href="#" onclick="logout()">Logout</a>
+</li>
+<li id="navAdmin" style="display:none;">
+<a href="#" onclick="showSection('admin'); loadAdminData();">Admin</a>
+</li>
+
+
+</ul>
+
+</nav>
+
+</header>
+
+
+<main class="container">
+
+
+<!-- HOME -->
+
+<section id="home" class="section active">
+
+<div class="hero">
+
+<h1>Smart Agriculture Recommendation System</h1>
+
+<p>
+AI Powered Crop Monitoring using Vision Transformer
+</p>
+
+<button class="cta-button" onclick="showSection('analysis')">
+Analyze Crop
+</button>
+<br><br>
+
+<button class="cta-button" onclick="showSection('login')" id="homeLoginBtn">
+Login
+</button>
+
+</div>
+
+</section>
+
+
+<!-- ABOUT -->
+
+<section id="about" class="section">
+
+<h2 class="section-title">About the Project</h2>
+
+<div class="card">
+
+<p>
+This project is a Smart Agriculture Recommendation System that uses 
+Artificial Intelligence to assist farmers in analyzing crop growth and 
+making better farming decisions.
+</p>
+
+<p>
+The core technology used in this system is the <b>Vision Transformer (ViT)</b>, 
+which is a deep learning model designed for image analysis. Unlike traditional 
+CNN models, ViT processes images as a sequence of patches and learns patterns 
+globally across the image.
+</p>
+
+</div>
+
+
+<!-- IMAGE SECTION -->
+
+<div class="grid">
+
+<div class="card">
+<img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6">
+<h3>Crop Image Input</h3>
+<p>Users upload crop images for analysis.</p>
+</div>
+
+<div class="card">
+<img src="https://images.unsplash.com/photo-1518770660439-4636190af475">
+<h3>Image Processing</h3>
+<p>Image is divided into patches and processed by AI.</p>
+</div>
+
+<div class="card">
+<img src="https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc">
+<h3>AI Analysis (ViT)</h3>
+<p>Model identifies growth stage and crop condition.</p>
+</div>
+
+<div class="card">
+<img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef">
+<h3>Smart Recommendations</h3>
+<p>System provides irrigation and fertilizer advice.</p>
+</div>
+
+</div>
+
+
+<!-- WORKING EXPLANATION -->
+
+<div class="card">
+
+<h3>How Vision Transformer (ViT) Works</h3>
+
+<p>
+1. The uploaded crop image is divided into small patches (like 16x16 pixels).
+</p>
+
+<p>
+2. Each patch is converted into a numerical representation (embedding).
+</p>
+
+<p>
+3. These embeddings are passed into the Transformer model, which uses 
+self-attention to understand relationships between different parts of the image.
+</p>
+
+<p>
+4. The model identifies patterns such as leaf structure, color, and texture 
+to determine the crop growth stage.
+</p>
+
+<p>
+5. Based on the detected stage, the system generates recommendations 
+for irrigation and fertilizer usage.
+</p>
+
+</div>
+
+
+<!-- BENEFITS -->
+
+<div class="card">
+
+<h3>Key Benefits</h3>
+
+<ul>
+<li>🌱 Accurate crop growth stage detection</li>
+<li>💧 Smart irrigation planning</li>
+<li>🌾 Efficient fertilizer usage</li>
+<li>⚡ Fast and user-friendly system</li>
+<li>📱 Can be used by farmers easily</li>
+</ul>
+
+</div>
+
+</section>
+
+
+
+<!-- ANALYSIS -->
+
+<section id="analysis" class="section">
+
+<h2 class="section-title">Crop Growth Stage Detection</h2>
+
+<div class="analysis-box">
+
+<input type="file" id="cropImage" onchange="previewImage(event)">
+
+<img id="preview">
+<label style="display:block;margin-top:10px;">
+<input type="checkbox" id="confirmCrop">
+ I confirm this is a crop/plant image 🌱
+</label>
+
+<button onclick="analyzeCrop()" class="cta-button">
+Run ViT Analysis
+</button>
+
+</div>
+
+</section>
+<section id="irrigation" class="section">
+
+<h2 class="section-title">Irrigation Recommendation</h2>
+
+<div class="card">
+
+<p>Select your crop condition to get irrigation advice:</p>
+
+<select id="irrigationInput">
+<option value="low">Low Growth (Seedling)</option>
+<option value="medium">Vegetative Stage</option>
+<option value="high">Mature Crop</option>
+</select>
+
+<button class="cta-button" onclick="getIrrigation()">
+Get Irrigation Advice
+</button>
+
+<h3 id="irrigationOutput"></h3>
+
+</div>
+
+</section>
+<section id="fertilizer" class="section">
+
+<h2 class="section-title">Fertilizer Recommendation</h2>
+
+<div class="card">
+
+<p>Select crop stage for fertilizer advice:</p>
+
+<select id="fertilizerInput">
+<option value="seed">Seedling</option>
+<option value="veg">Vegetative</option>
+<option value="flower">Flowering</option>
+<option value="mature">Mature</option>
+</select>
+
+<button class="cta-button" onclick="getFertilizer()">
+Get Fertilizer Advice
+</button>
+
+<h3 id="fertilizerOutput"></h3>
+
+</div>
+
+</section>
+<section id="resultPage" class="section">
+
+<h2 class="section-title">AI Crop Analysis Result</h2>
+
+<div class="result-card">
+
+<img id="resultImage">
+
+<h3 id="stageResult"></h3>
+
+<p id="irrigationResult"></p>
+<p id="fertilizerResult"></p>
+
+<button onclick="downloadReport()" class="cta-button">
+Download Report
+</button>
+
+</div>
+
+</section>
+
+
+<!-- RECOMMENDATIONS -->
+
+<section id="recommendation" class="section">
+
+<h2 class="section-title">Agriculture Recommendations</h2>
+
+<div class="grid">
+
+
+<div class="card" onclick="showSection('analysis')" style="cursor:pointer;">
+
+<img src="https://images.unsplash.com/photo-1464226184884-fa280b87c399">
+
+<h3>Growth Stage Detection</h3>
+
+<p>Vision Transformer identifies crop growth stages.</p>
+
+</div>
+
+
+<div class="card" onclick="showSection('irrigation')" style="cursor:pointer;">
+
+<img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef">
+
+<h3>Irrigation Suggestion</h3>
+
+<p>Smart water recommendations for healthy crops.</p>
+
+</div>
+
+<div class="card" onclick="showSection('fertilizer')" style="cursor:pointer;">
+
+<img src="https://images.unsplash.com/photo-1471193945509-9ad0617afabf">
+
+<h3>Fertilizer Advice</h3>
+
+<p>Suggests fertilizers based on crop condition.</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- TECHNOLOGY -->
+
+<section id="technology" class="section">
+
+<h2 class="section-title">Technologies Used</h2>
+
+<div class="grid">
+
+<div class="card">
+
+<h3>Vision Transformer</h3>
+<p>Deep learning model for image classification</p>
+
+</div>
+
+<div class="card">
+
+<h3>TensorFlow / PyTorch</h3>
+<p>Framework used for training AI models</p>
+
+</div>
+
+<div class="card">
+
+<h3>OpenCV</h3>
+<p>Image processing and feature extraction</p>
+
+</div>
+
+<div class="card">
+
+<h3>Python</h3>
+<p>Main language used for model implementation</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<section id="login" class="section">
+
+<h2 class="section-title">Login System</h2>
+
+<div class="card">
+
+<input type="text" id="username" placeholder="Enter Username">
+<br><br>
+
+<input type="password" id="password" placeholder="Enter Password">
+<br><br>
+
+<select id="role">
+<option value="user">User</option>
+<option value="admin">Admin</option>
+</select>
+
+<br><br>
+
+<button class="cta-button" onclick="login()">Login</button>
+
+<p id="loginMsg"></p>
+
+</div>
+
+</section>
+
+<section id="admin" class="section">
+
+
+<h2 class="section-title">Admin Dashboard</h2>
+
+<div class="card">
+
+<h3>Stored Crop Records</h3>
+
+<div id="adminData"></div>
+
+</div>
+
+</section>
+
+
+</main>
+
+
+<footer>
+
+<p>© 2026 Smart Agri Recommendation System</p>
+
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.6.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
