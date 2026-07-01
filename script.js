@@ -1,12 +1,49 @@
 /* ---------------- GLOBAL ---------------- */
 
 let currentUser = null;
+const WEATHER_API_KEY = "32776fd38a8f41aea7163633262606";
 /* ADMIN CREDENTIALS */
+
 
 const ADMIN_EMAIL = "admin@agri.com";
 const ADMIN_PASSWORD = "1234";
 
+/*------------------ startVoice---------------- */
+function startVoice() {
 
+    const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+        alert("Speech recognition not supported");
+        return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    let language = document.getElementById("chatLanguage").value;
+
+        if(language === "Hindi"){
+            recognition.lang = "hi-IN";
+        }
+        else if(language === "Marathi"){
+            recognition.lang = "mr-IN";
+        }
+        else{
+            recognition.lang = "en-US";
+        }
+
+    recognition.start();
+
+    recognition.onresult = function(event) {
+
+        document.getElementById("userInput").value =
+            event.results[0][0].transcript;
+    };
+}
 /* ---------------- NAVIGATION ---------------- */
 
 function showSection(id){
@@ -165,6 +202,22 @@ document.getElementById("irrigationResult").innerText =
 document.getElementById("fertilizerResult").innerText =
 "Fertilizer: " + result.fertilizer;
 
+generateAIRecommendation(
+    result.stage,
+    result.irrigation,
+    result.fertilizer
+);
+
+document.getElementById("fullAnalysis").innerHTML =
+"🤖 Generating AI recommendation...";
+
+getAIRecommendation(result.stage)
+.then(ai => {
+
+document.getElementById("fullAnalysis").innerHTML = ai;
+
+});
+
 /* ✅ SAVE DATA (FIXED POSITION) */
 
 let record = {
@@ -191,29 +244,74 @@ img.src = URL.createObjectURL(file);
 
 /* ---------------- DOWNLOAD REPORT ---------------- */
 
-function downloadReport(){
+async function downloadReport() {
 
-let stage=document.getElementById("stageResult").innerText;
-let irrigation=document.getElementById("irrigationResult").innerText;
-let fertilizer=document.getElementById("fertilizerResult").innerText;
+    const { jsPDF } = window.jspdf;
 
-let report =
+    const doc = new jsPDF();
 
-"SMART AGRI AI REPORT\n\n"+
-"Crop Growth Detection System\n\n"+
-stage+"\n\n"+
-irrigation+"\n\n"+
-fertilizer+"\n\n"+
-"Generated for College Minor Project";
+    let stage = document.getElementById("stageResult").innerText;
+    let irrigation = document.getElementById("irrigationResult").innerText;
+    let fertilizer = document.getElementById("fertilizerResult").innerText;
 
-let blob=new Blob([report],{type:"text/plain"});
+    let image = document.getElementById("resultImage");
 
-let link=document.createElement("a");
+    doc.setFontSize(20);
+    doc.text("AgriVision AI", 70, 20);
 
-link.href=URL.createObjectURL(blob);
-link.download="Agri_Report.txt";
+    doc.setFontSize(14);
+    doc.text("Smart Agriculture Recommendation Report", 20, 35);
 
-link.click();
+    doc.setFontSize(11);
+    doc.text("Generated: " + new Date().toLocaleString(), 20, 45);
+
+    // Add uploaded image
+    if (image.src) {
+
+        const img = new Image();
+
+        img.crossOrigin = "Anonymous";
+
+        img.src = image.src;
+
+        await new Promise(resolve => {
+
+            img.onload = function () {
+
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
+
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                ctx.drawImage(img, 0, 0);
+
+                const dataURL = canvas.toDataURL("image/jpeg");
+
+                doc.addImage(dataURL, "JPEG", 20, 55, 60, 60);
+
+                resolve();
+
+            }
+
+        });
+
+    }
+
+    doc.text(stage, 20, 130);
+    doc.text(irrigation, 20, 145);
+    doc.text(fertilizer, 20, 160);
+
+    doc.setFontSize(13);
+
+    doc.text("AI Powered by:",20,180);
+    doc.text("Gemma 3 (Ollama)",60,180);
+
+    doc.text("Weather Support: Live Weather API",20,190);
+
+    doc.text("Multilingual AI Chatbot Enabled",20,200);
+
+    doc.save("AgriVision_AI_Report.pdf");
 
 }
 
@@ -398,5 +496,465 @@ document.getElementById("logoutBtn").style.display = "none";
 alert("Logged out successfully ✅");
 
 showSection("home");
+
+}
+
+async function sendMessage() {
+
+    let input = document.getElementById("userInput");
+    let chatBox = document.getElementById("chatBox");
+    let language = document.getElementById("chatLanguage").value;
+
+    let userMessage = input.value.trim();
+
+    if(!userMessage) return;
+
+    chatBox.innerHTML += `
+    <p><b>👨 Farmer:</b> ${userMessage}</p>
+    `;
+
+    input.value = "";
+
+    chatBox.innerHTML += `
+    <p id="loading"><b>🤖 AgriVision AI:</b> Thinking...</p>
+    `;
+
+    try {
+
+        const response = await fetch(
+            "http://localhost:11434/api/generate",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type":"application/json"
+                },
+                body: JSON.stringify({
+                    model: "gemma3:4b",
+
+                    prompt: `
+                You are AgriVision AI.
+
+                You are an expert agricultural assistant.
+
+                Always answer in ${language}.
+
+                Use simple words that a farmer can understand.
+
+                If the question is about crops,
+                give irrigation,
+                fertilizer,
+                disease prevention,
+                and precautions.
+
+                Question:
+
+                ${userMessage}
+`,
+                    stream:false
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        document.getElementById("loading").remove();
+
+        chatBox.innerHTML += `
+        <p><b>🤖 AgriVision AI:</b>
+        ${data.response}</p>
+        `;
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+    } catch(err){
+
+        document.getElementById("loading").remove();
+
+        chatBox.innerHTML += `
+        <p><b>🤖 AgriVision AI:</b>
+        Ollama is not running.</p>
+        `;
+
+        console.error(err);
+    }
+}
+async function getAIRecommendation(stage) {
+
+    const response = await fetch("http://localhost:11434/api/generate", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+
+            model: "gemma3:4b",
+
+            prompt: `
+You are an agriculture expert.
+
+A crop image has been analyzed.
+
+Detected Stage:
+
+${stage}
+
+Explain in SIMPLE language.
+
+Give:
+
+1. Irrigation advice
+
+2. Fertilizer advice
+
+3. Disease precautions
+
+4. Best farming tips
+
+Keep answer under 8 lines.
+`,
+
+            stream: false
+
+        })
+
+    });
+
+    const data = await response.json();
+
+    return data.response;
+}
+async function getWeather() {
+
+    let city = document.getElementById("cityName").value;
+
+    if(city==""){
+        alert("Please enter city");
+        return;
+    }
+
+    try{
+
+        const response = await fetch(
+`https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${city}&aqi=no`
+        );
+
+        const data = await response.json();
+
+        let temp = data.current.temp_c;
+        let humidity = data.current.humidity;
+        let wind = data.current.wind_kph;
+        let condition = data.current.condition.text;
+
+        document.getElementById("weatherResult").innerHTML = `
+        🌍 <b>${data.location.name}</b><br><br>
+
+        🌡 Temperature : ${temp} °C<br>
+
+        💧 Humidity : ${humidity}%<br>
+
+        🌬 Wind : ${wind} km/h<br>
+
+        ☁ Weather : ${condition}
+        `;
+
+        getWeatherAI(city,temp,humidity,condition);
+
+    }
+    catch(error){
+
+        console.log(error);
+
+        alert("Unable to fetch weather");
+
+    }
+
+}
+async function getWeatherAI(city,temp,humidity,condition){
+
+const response = await fetch(
+"http://localhost:11434/api/generate",
+{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+model:"gemma3:4b",
+
+prompt:`
+
+You are an agriculture expert.
+
+Current Weather
+
+City : ${city}
+
+Temperature : ${temp}°C
+
+Humidity : ${humidity}%
+
+Condition : ${condition}
+
+Give advice for farmers.
+
+Mention
+
+1. Irrigation
+
+2. Fertilizer
+
+3. Crop Precautions
+
+Use simple language.
+
+Keep answer under 6 lines.
+
+`,
+
+stream:false
+
+})
+
+}
+
+);
+
+const data=await response.json();
+
+document.getElementById("weatherAI").innerHTML=
+
+"<br><h3>🤖 AI Weather Recommendation</h3><br>"+data.response;
+
+}
+function speakLastReply() {
+
+    let messages = document.querySelectorAll("#chatBox p");
+
+    if (messages.length === 0) {
+        alert("No AI reply available.");
+        return;
+    }
+
+    // Find the last AI message
+    let aiReply = "";
+
+    for (let i = messages.length - 1; i >= 0; i--) {
+        if (messages[i].innerText.startsWith("🤖")) {
+            aiReply = messages[i].innerText.replace("🤖 AgriVision AI:", "").trim();
+            break;
+        }
+    }
+
+    if (!aiReply) {
+        alert("No AI reply found.");
+        return;
+    }
+
+    speechSynthesis.cancel();
+
+    const speech = new SpeechSynthesisUtterance(aiReply);
+
+    // Match selected language
+    const lang = document.getElementById("languageSelect").value;
+
+    speech.lang = lang;   // hi-IN, en-US, mr-IN
+
+    speech.rate = 1;
+    speech.pitch = 1;
+
+    speechSynthesis.speak(speech);
+}
+function getCurrentLocationWeather() {
+
+    if (!navigator.geolocation) {
+
+        alert("Geolocation is not supported by your browser.");
+
+        return;
+
+    }
+
+    navigator.geolocation.getCurrentPosition(
+
+        position => {
+
+            let lat = position.coords.latitude;
+
+            let lon = position.coords.longitude;
+
+            getWeatherByCoordinates(lat, lon);
+
+        },
+
+        () => {
+
+            alert("Location permission denied.");
+
+        }
+
+    );
+
+}
+async function getWeatherByCoordinates(lat, lon) {
+
+    try {
+
+        let response = await fetch(
+
+`https://api.weatherapi.com/v1/current.json?key=32776fd38a8f41aea7163633262606&q=${lat},${lon}&aqi=no`
+
+        );
+
+        let data = await response.json();
+
+        document.getElementById("weatherResult").innerHTML = `
+
+        <h3>📍 ${data.location.name}</h3>
+
+        🌡 Temperature : ${data.current.temp_c} °C <br>
+
+        💧 Humidity : ${data.current.humidity}% <br>
+
+        🌥 Condition : ${data.current.condition.text}
+
+        `;
+
+    }
+
+    catch(err){
+
+        console.log(err);
+
+        alert("Unable to fetch weather.");
+
+    }
+
+}
+async function generateAIRecommendation(stage, irrigation, fertilizer) {
+
+    document.getElementById("aiRecommendation").style.display = "block";
+
+    document.getElementById("aiRecommendationText").innerHTML =
+    "🧠 Generating AI recommendation...";
+
+    const lang = document.getElementById("languageSelect").value;
+
+    let prompt = `
+You are AgriVision AI.
+
+You are an experienced agricultural expert.
+
+Respond ONLY in the selected language.
+
+Language:
+${lang}
+
+Crop Stage:
+${stage}
+
+Suggested Irrigation:
+${irrigation}
+
+Suggested Fertilizer:
+${fertilizer}
+
+Give a SIMPLE answer suitable for Indian farmers.
+
+Use exactly this format:
+
+🌱 Crop Stage
+
+💧 Irrigation Advice
+
+🌿 Fertilizer Advice
+
+🐛 Disease Prevention
+
+⚠ Precautions
+
+Maximum 6 short points.
+`;
+
+    try {
+
+        const response = await fetch("http://localhost:11434/api/generate", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+
+                model: "gemma3:4b",
+
+                prompt: prompt,
+
+                stream: false
+
+            })
+
+        });
+
+        const data = await response.json();
+
+        document.getElementById("aiRecommendationText").innerText =
+            data.response;
+
+    }
+
+    catch(err){
+
+        document.getElementById("aiRecommendationText").innerHTML =
+        "Unable to generate AI recommendation.";
+
+    }
+
+}
+function loadHistory(){
+
+    let history = JSON.parse(localStorage.getItem("cropData")) || [];
+
+    let output = "";
+
+    if(history.length===0){
+
+        output = `
+        <div class="card">
+        <h3>No Analysis Found</h3>
+        </div>
+        `;
+
+    }
+
+    history.reverse().forEach((item,index)=>{
+
+        output += `
+        <div class="card">
+
+        <h3>Analysis ${index+1}</h3>
+
+        <p><b>Stage:</b> ${item.stage}</p>
+
+        <p><b>Irrigation:</b> ${item.irrigation}</p>
+
+        <p><b>Fertilizer:</b> ${item.fertilizer}</p>
+
+        <p><b>Date:</b> ${item.time}</p>
+
+        </div>
+        `;
+
+    });
+
+    document.getElementById("historyContainer").innerHTML = output;
 
 }

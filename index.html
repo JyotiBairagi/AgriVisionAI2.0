@@ -21,20 +21,32 @@
 
 <ul class="nav-links">
 
-<li><a href="#" onclick="showSection('home')">Home</a></li>
-<li><a href="#" onclick="showSection('about')">About</a></li>
-<li><a href="#" onclick="showSection('analysis')">Crop Analysis</a></li>
-<li><a href="#" onclick="showSection('recommendation')">Recommendations</a></li>
-<li><a href="#" onclick="showSection('technology')">Technology</a></li>
-<li id="navLogin"><a href="#" onclick="showSection('login')">Login</a></li>
+<li><a href="javascript:void(0)" onclick="showSection('home')">Home</a></li>
+<li><a href="javascript:void(0)" onclick="showSection('about')">About</a></li>
+<li><a href="javascript:void(0)" onclick="showSection('analysis')">Crop Analysis</a></li>
+<li><a href="javascript:void(0)" onclick="showSection('recommendation')">Recommendations</a></li>
+<li><a href="javascript:void(0)" onclick="showSection('history'); loadHistory();">History</a></li>
+<li><a href="javascript:void(0)" onclick="showSection('technology')">Technology</a></li>
+<li id="navLogin"><a href="javascript:void(0)" onclick="showSection('login')">Login</a></li>
+<li><a href="javascript:void(0)" onclick="showSection('weather')">Weather</a></li>
+<li>
+<a href="javascript:void(0)"
+onclick="showSection('weather')">
+
+Weather AI
+
+</a>
+</li>
+<li><a href="javascript:void(0)" onclick="showSection('help')">Help Centre</a></li>
+<li><a href="javascript:void(0)" onclick="showSection('chatbot')">AI Chat</a></li>
 <li id="userDisplay" style="display:none; color:#fff; font-weight:bold;">
 👤 <span id="userEmail"></span>
 </li>
 <li id="logoutBtn" style="display:none;">
-<a href="#" onclick="logout()">Logout</a>
+<a href="javascript:void(0)" onclick="logout()">Logout</a>
 </li>
 <li id="navAdmin" style="display:none;">
-<a href="#" onclick="showSection('admin'); loadAdminData();">Admin</a>
+<a href="javascript:void(0)" onclick="showSection('admin'); loadAdminData();">Admin</a>
 </li>
 
 
@@ -54,20 +66,26 @@
 
 <div class="hero">
 
-<h1>Smart Agriculture Recommendation System</h1>
+<h1 id="homeTitle">
+Smart Agriculture Recommendation System
+</h1>
 
 <p>
-AI Powered Crop Monitoring using Vision Transformer
+AI Powered Crop Monitoring using Vision Transformer</p>
+<p>
+Empowering farmers with intelligent insights using AI-driven crop analysis.
+</p>
+<p>
+Transforming agriculture through smart, data-based decision making.🌱
 </p>
 
-<button class="cta-button" onclick="showSection('analysis')">
+<button
+id="analyzeBtn"
+class="cta-button"
+onclick="showSection('analysis')">
 Analyze Crop
 </button>
 <br><br>
-
-<button class="cta-button" onclick="showSection('login')" id="homeLoginBtn">
-Login
-</button>
 
 </div>
 
@@ -78,8 +96,11 @@ Login
 
 <section id="about" class="section">
 
-<h2 class="section-title">About the Project</h2>
-
+<h2
+id="aboutTitle"
+class="section-title">
+About the Project
+</h2>
 <div class="card">
 
 <p>
@@ -103,25 +124,25 @@ globally across the image.
 <div class="grid">
 
 <div class="card">
-<img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6">
+<img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6" alt="Crop field agriculture image">
 <h3>Crop Image Input</h3>
 <p>Users upload crop images for analysis.</p>
 </div>
 
 <div class="card">
-<img src="https://images.unsplash.com/photo-1518770660439-4636190af475">
+<img src="https://images.unsplash.com/photo-1518770660439-4636190af475"alt="Image processing image">
 <h3>Image Processing</h3>
 <p>Image is divided into patches and processed by AI.</p>
 </div>
 
 <div class="card">
-<img src="https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc">
+<img src="https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc" alt="AI analysis image">
 <h3>AI Analysis (ViT)</h3>
 <p>Model identifies growth stage and crop condition.</p>
 </div>
 
 <div class="card">
-<img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef">
+<img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef" alt="Smart recommendations image">
 <h3>Smart Recommendations</h3>
 <p>System provides irrigation and fertilizer advice.</p>
 </div>
@@ -189,16 +210,25 @@ for irrigation and fertilizer usage.
 
 <div class="analysis-box">
 
-<input type="file" id="cropImage" onchange="previewImage(event)">
+<label for="cropImage">Upload Crop Image</label>
 
-<img id="preview">
+<input
+  type="file"
+  id="cropImage"
+  accept="image/*"
+  aria-label="Upload crop image"
+  onchange="previewImage(event)"
+>
+<img id="preview" alt="Crop preview image">
 <label style="display:block;margin-top:10px;">
 <input type="checkbox" id="confirmCrop">
  I confirm this is a crop/plant image 🌱
 </label>
 
 <button onclick="analyzeCrop()" class="cta-button">
-Run ViT Analysis
+
+🤖 Analyze Crop with Gemini AI
+
 </button>
 
 </div>
@@ -263,6 +293,12 @@ Get Fertilizer Advice
 
 <p id="irrigationResult"></p>
 <p id="fertilizerResult"></p>
+<p id="fullAnalysis"></p>
+
+<div id="aiRecommendation" class="card" style="margin-top:20px;display:none;">
+    <h3>🤖 AI Recommendation</h3>
+    <p id="aiRecommendationText"></p>
+</div>
 
 <button onclick="downloadReport()" class="cta-button">
 Download Report
@@ -272,7 +308,13 @@ Download Report
 
 </section>
 
+<section id="history" class="section">
 
+<h2 class="section-title">Analysis History</h2>
+
+<div id="historyContainer"></div>
+
+</section>
 <!-- RECOMMENDATIONS -->
 
 <section id="recommendation" class="section">
@@ -284,7 +326,7 @@ Download Report
 
 <div class="card" onclick="showSection('analysis')" style="cursor:pointer;">
 
-<img src="https://images.unsplash.com/photo-1464226184884-fa280b87c399">
+<img src="https://images.unsplash.com/photo-1464226184884-fa280b87c399" alt="Growth stage detection image">
 
 <h3>Growth Stage Detection</h3>
 
@@ -295,7 +337,7 @@ Download Report
 
 <div class="card" onclick="showSection('irrigation')" style="cursor:pointer;">
 
-<img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef">
+<img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef" alt="Irrigation suggestion image">
 
 <h3>Irrigation Suggestion</h3>
 
@@ -305,7 +347,7 @@ Download Report
 
 <div class="card" onclick="showSection('fertilizer')" style="cursor:pointer;">
 
-<img src="https://images.unsplash.com/photo-1471193945509-9ad0617afabf">
+<img src="https://images.unsplash.com/photo-1471193945509-9ad0617afabf" alt="Fertilizer advice image">
 
 <h3>Fertilizer Advice</h3>
 
@@ -366,15 +408,23 @@ Download Report
 
 <div class="card">
 
-<input type="text" id="username" placeholder="Enter Username">
-<br><br>
+<label for="username">Username</label>
+<input type="text" id="username" placeholder="Enter Username" autocomplete="username">
 
-<input type="password" id="password" placeholder="Enter Password">
-<br><br>
+<label for="password">Password</label>
+<input type="password" id="password" placeholder="Enter Password" autocomplete="current-password">
+<label for="languageSelect">Language</label>
+<select id="languageSelect" aria-label="Select Language">
+<option value="hi-IN">Hindi</option>
+<option value="en-US">English</option>
+<option value="mr-IN">Marathi</option>
+</select>
 
-<select id="role">
+<label for="role">Role</label>
+<select id="role" aria-label="Select Role">
 <option value="user">User</option>
-<option value="admin">Admin</option>
+
+
 </select>
 
 <br><br>
@@ -387,21 +437,143 @@ Download Report
 
 </section>
 
-<section id="admin" class="section">
+<!------weather-->
+<section id="weather" class="section">
 
-
-<h2 class="section-title">Admin Dashboard</h2>
+<h2 class="section-title">
+🌦️ Weather Based Recommendation
+</h2>
 
 <div class="card">
 
-<h3>Stored Crop Records</h3>
+<label>Enter City</label>
 
-<div id="adminData"></div>
+<input
+type="text"
+id="cityName"
+placeholder="Enter City Name">
+
+<br><br>
+
+<button
+class="cta-button"
+onclick="getWeather()">
+
+Get Weather
+
+</button>
+<button class="cta-button" onclick="getCurrentLocationWeather()">
+📍 Use My Current Location
+</button>
+
+<br><br>
+
+<h3 id="weatherResult"></h3>
+
+<p id="weatherAI"></p>
 
 </div>
 
 </section>
 
+<!-- HELP CENTRE -->
+
+
+
+<section id="help" class="section">
+
+<h2
+id="aboutTitle"
+class="section-title">
+About the Project
+</h2>
+
+<div class="card">
+
+<h3>Government Support</h3>
+
+<p>Connect with official agriculture services and helplines.</p>
+
+<button class="cta-button" onclick="loadGovSchemes()">
+Fetch Government Schemes
+</button>
+
+<div id="govData" style="margin-top:20px;"></div>
+
+</div>
+
+<div class="card">
+
+<h3>📞 Kisan Helpline</h3>
+
+<p><b>Toll Free:</b> 1800-180-1551</p>
+<p>Get expert advice directly from agriculture officers.</p>
+
+</div>
+
+<div class="card">
+
+<h3>🌐 Useful Government Links</h3>
+
+<ul style="text-align:left;">
+<li><a href="https://pmkisan.gov.in" target="_blank" rel="noopener noreferrer">PM Kisan Scheme</a></li>
+<li><a href="https://enam.gov.in" target="_blank" rel="noopener noreferrer">e-NAM Market</a></li>
+</ul>
+
+</div>
+
+</section>
+<section id="chatbot" class="section">
+
+<h2
+id="chatTitle"
+class="section-title">
+🤖 Farmer AI Assistant
+</h2>
+<div class="card">
+
+<div id="chatBox" style="height:300px; overflow-y:auto; text-align:left; margin-bottom:10px;"></div>
+
+<label>Select Language</label>
+
+<select id="chatLanguage">
+
+<option value="English">English</option>
+
+<option value="Hindi">Hindi</option>
+
+<option value="Marathi">Marathi</option>
+
+</select>
+
+<br><br>
+
+<input
+type="text"
+id="userInput"
+placeholder="Ask your farming question..."
+>
+
+<br><br>
+
+<button class="cta-button" onclick="sendMessage()">
+
+Send
+
+</button>
+<button class="cta-button" onclick="speakLastReply()">
+🔊 Listen
+</button>
+
+<button class="cta-button" onclick="startVoice()">
+
+🎤 Speak
+
+</button>
+
+</div>
+
+</section>
 
 </main>
 
@@ -413,6 +585,7 @@ Download Report
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.6.0/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="script.js"></script>
 
 </body>
