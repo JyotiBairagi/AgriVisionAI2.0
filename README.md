@@ -144,9 +144,8 @@ AgriVision AI uses **Gemma 3:4B** running locally through **Ollama** to generate
 
 ---
 
-## 📸 Screenshots
+<img width="1920" height="1080" alt="Screenshot (192)" src="https://github.com/user-attachments/assets/26fb9470-f86d-40c7-94d3-6d161846713a" />
 
-Add screenshots here.
 
 Example:
 
